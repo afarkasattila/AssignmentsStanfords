@@ -1,5 +1,6 @@
 import numpy as np
 from random import shuffle
+from past.builtins import xrange
 
 def softmax_loss_naive(W, X, y, reg):
   """
@@ -29,6 +30,44 @@ def softmax_loss_naive(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
+
+  N = X.shape[0]
+  C = W.shape[1]
+
+  scores = np.dot(X, W) # (N,C)
+
+  #print(enumerate(scores[0]))
+  #print("W = ", W)
+  #print("C = ", C)
+  #print("N = ", N)
+
+  L = np.zeros(N)
+
+  for currentX in np.arange(N):
+
+    numerator = np.exp(scores[currentX, y[currentX]])
+    denominator = 0
+
+    #for currentCindex, currentC in enumerate(scores[currentX]):
+      #print (currentX)
+      #print (ss)
+      #print (scores[currentX])
+      #print(y[currentX])
+      #if (currentCindex != y[currentX]):
+      #  denominator += np.exp(scores[currentX, y[currentX]])
+
+      #L[currentCindex] = - np.log(numerator / denominator)
+
+    scoreCorectClass = np.exp(scores[currentX, y[currentX]])
+    scoreSum = np.sum(np.exp(scores[currentX]))
+
+    L[currentX] = -np.log(scoreCorectClass / scoreSum)
+
+    #print (currentX, L[currentX])
+
+  loss += np.sum(L)/N + reg * np.sum(W**2)
+
+
   pass
   #############################################################################
   #                          END OF YOUR CODE                                 #
