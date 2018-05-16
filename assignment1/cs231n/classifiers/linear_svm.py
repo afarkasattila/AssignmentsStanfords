@@ -1,7 +1,9 @@
 import numpy as np
 from random import shuffle
+from past.builtins import xrange
 
-"""
+def svm_loss_naive(W, X, y, reg):
+  """
   Structured SVM loss function, naive implementation (with loops).
 
   Inputs have dimension D, there are C classes, and we operate on minibatches
@@ -17,44 +19,30 @@ from random import shuffle
   Returns a tuple of:
   - loss as single float
   - gradient with respect to weights W; an array of same shape as W
-"""
-def svm_loss_naive(W, X, y, reg):
-    dW = np.zeros(W.shape) # initialize the gradient as zero
-    # compute the loss and the gradient
-    
-    num_classes = W.shape[1]
-    num_train = X.shape[0]
-    loss = 0.0
-    
-    for i in range(num_train):
-        nr_of_corr_margin = 0
-        scores = X[i].dot(W)
-        correct_class_score = scores[y[i]]
-        for j in range(num_classes):
-            if j == y[i]:
-                continue
-            margin = scores[j] - correct_class_score + 1 # note delta = 1
-            if margin > 0:
-                nr_of_corr_margin += 1
-                dW.T[j] += X[i]
-                loss += margin
-        dW.T[y[i]] += (-1) *  nr_of_corr_margin * X[i]
-      # Right now the loss is a sum over all training examples, but we want it
-      # to be an average instead so we divide by num_train.
-    loss /= num_train
-      # Add regularization to the loss.
-    loss += reg * np.sum(W * W)
-    dW += 2 * reg
-    dW /= num_train
+  """
+  dW = np.zeros(W.shape) # initialize the gradient as zero
 
-    num_dimensions = W.shape[0]
-    dW = np.zeros(W.shape)
-    for i in range(num_dimensions):
-        for j in range(num_classes):
-            for k in range(num_train):
-                dW[i,j] += x[i]
+  # compute the loss and the gradient
+  num_classes = W.shape[1]
+  num_train = X.shape[0]
+  loss = 0.0
+  for i in xrange(num_train):
+    scores = X[i].dot(W)
+    correct_class_score = scores[y[i]]
+    for j in xrange(num_classes):
+      if j == y[i]:
+        continue
+      margin = scores[j] - correct_class_score + 1 # note delta = 1
+      if margin > 0:
+        loss += margin
+        dW[:,j] += X[i] - X[y[i]] ##
 
-    return loss, dW
+  # Right now the loss is a sum over all training examples, but we want it
+  # to be an average instead so we divide by num_train.
+  loss /= num_train
+
+  # Add regularization to the loss.
+  loss += reg * np.sum(W * W)
 
   #############################################################################
   # TODO:                                                                     #
@@ -65,37 +53,76 @@ def svm_loss_naive(W, X, y, reg):
   # code above to compute the gradient.                                       #
   #############################################################################
 
+  dW /= num_train
 
+  #print (dW)
+
+  dW += 2 * W
+
+  #print ("\n", dW)
+
+  #print ("\n", W)
+
+  return loss, dW
 
 
 def svm_loss_vectorized(W, X, y, reg):
-    """
-    Structured SVM loss function, vectorized implementation.
-    Inputs and outputs are the same as svm_loss_naive.
-    """
-    loss = 0.0
-    dW = np.zeros(W.shape) # initialize the gradient as zero
-    
-    num_classes = W.shape[1]
-    num_train = X.shape[0]
-    num_pixel = X.shape[1]
+  """
+  Structured SVM loss function, vectorized implementation.
+
+  Inputs and outputs are the same as svm_loss_naive.
+  """
+  loss = 0.0
+  dW = np.zeros(W.shape) # initialize the gradient as zero
+
   #############################################################################
   # TODO:                                                                     #
   # Implement a vectorized version of the structured SVM loss, storing the    #
   # result in loss.                                                           #
   #############################################################################
-    scores = np.dot(X, W)
-    subtr = (scores.T - scores[np.arange(num_train), y]).T + 1.0
-    margins = np.maximum(0.0, subtr)
-    margins[np.arange(num_train), y] = 0.0
-    Li = np.sum(margins, axis=1)
-    loss = np.average(Li)
-    loss += reg * np.sum(W * W)
 
-    pass
+  num_classes = W.shape[1]
+  num_train = X.shape[0]
+
+  scores = X.dot(W)
+  correct_class_scores = scores[np.arange(len(y)), y]
+
+  print ("X = ", X.shape)
+  print ("W = ", W.shape)
+  print (scores.shape)
+  print ((correct_class_scores.reshape(500,1)).shape)
+
+  idx = 1
+  print ("Bemenet indexe (kep - X):", idx)
+  print ("A bemeneti kep helyes osztalyanak indexe:", y[idx])
+  print ("A bemeneti kep s-ei (scores):", scores[idx, :])
+  print ("A bemeneti kep helyes s-e", correct_class_scores[idx])
+  s = scores - correct_class_scores.reshape(500,1)
+  print ("Elso ideiglenes tomb", s[idx])
+  s[s < -1] = 0
+  print ("Elso ideiglenes tomb nullazva", s[idx])
+  Li = np.sum(s, axis=1)
+  print ("Elso reszlegesen osszesitett veszteseg a bemeneti kep eseteben", Li[idx])
+  Li += (num_classes - 1)
+  print ("Osztalyok szama", (num_classes - 1))
+  print ("Elso osszesitett veszteseg a bemeneti kep eseteben", Li[idx])
+  print ("Elso osszesitett veszteseg", np.sum(Li)/ num_train)
+
+  print ("Li.shape", Li.shape)
+
+  print(W.shape)
+  print((W**2).shape)
+  print(np.sum(W).shape)
+  print((np.sum(W**2)).shape)
+  #print(sum)
+
+  loss = np.sum(Li) / num_train + reg * np.sum(W*W)
+
+  pass
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
+
 
   #############################################################################
   # TODO:                                                                     #
@@ -106,21 +133,9 @@ def svm_loss_vectorized(W, X, y, reg):
   # to reuse some of the intermediate values that you used to compute the     #
   # loss.                                                                     #
   #############################################################################
-
-    nr_of_not_zeros = np.count_nonzero(margins, axis=1)
-
-    for i in np.arange(num_train):
-        dW.T[y[i]] += (X[i].T * nr_of_not_zeros[i]).T * (-1)
-     
-    indexes = np.argwhere(margins != 0)
-    for i in np.arange(indexes.shape[0]):
-        dW.T[indexes.T[1][i]] += X[indexes.T[0][i]]
-
-    dW += 2 * reg
-    dW /= num_train
-    
+  pass
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
-    pass
-    return loss, dW
+
+  return loss, dW
