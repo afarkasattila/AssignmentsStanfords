@@ -32,14 +32,16 @@ def softmax_loss_naive(W, X, y, reg):
   #############################################################################
 
   N = X.shape[0]
+  D = W.shape[0]
   C = W.shape[1]
 
   scores = np.dot(X, W) # (N,C)
 
   #print(enumerate(scores[0]))
   #print("W = ", W)
-  #print("C = ", C)
-  #print("N = ", N)
+  print("D = ", D)
+  print("C = ", C)
+  print("N = ", N)
 
   L = np.zeros(N)
 
@@ -63,7 +65,22 @@ def softmax_loss_naive(W, X, y, reg):
 
     L[currentX] = -np.log(scoreCorectClass / scoreSum)
 
+    tdW = np.zeros_like(W)
+    for a in np.arange(D):
+      for b in np.arange(C):
+
+        sb = np.exp(scores[currentX, b])
+
+        if (b == y[currentX]):
+          tdW[a, b] = (sb / scoreSum - 1) * X[currentX, a]
+        else:
+          tdW[a, b] = (sb / scoreSum) * X[currentX, a]
+
+    dW += tdW / N
+
     #print (currentX, L[currentX])
+
+  dW += reg * 2 * W
 
   loss += np.sum(L)/N + reg * np.sum(W**2)
 
@@ -92,6 +109,41 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
+
+  N = X.shape[0]
+
+  idxN = np.arange(N)
+
+  scores = np.dot(X, W) # (N,C)
+  scores = np.exp(scores)
+
+  correctScores = scores[idxN, y]
+  scoreSum = np.sum(scores, axis=1)
+
+  # Calculate the loss.
+  loss = -np.log(correctScores / scoreSum)
+  loss = np.sum(loss) / N + reg * np.sum(W ** 2)
+
+  # Normalize the scores.
+  scoreSum = np.reshape(scoreSum, (scoreSum.shape[0], 1))
+  scores = scores / scoreSum
+
+  # Substract 1 from the correct class scores.
+  scores[idxN, y] = scores[idxN, y] - 1
+
+  # Prepare the matrices so they can be broadcasted together.
+  scores = scores.reshape((scores.shape[0], 1, scores.shape[1]))
+  X2 = X.reshape((X.shape[0], X.shape[1], 1))
+
+  # Broadcast the inputs to calculated and regularized scores.
+  dW = scores * X2
+
+  # Average the gradients.
+  dW = np.sum(dW, axis=0) / N
+
+  # Add regularization.
+  dW += reg * 2 * W
+
   pass
   #############################################################################
   #                          END OF YOUR CODE                                 #
