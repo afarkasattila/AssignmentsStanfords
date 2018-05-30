@@ -77,21 +77,26 @@ class TwoLayerNet(object):
     # shape (N, C).                                                             #
     #############################################################################
 
+    #H = b1.shape[0]
+    #C = b2.shape[0]
+
+    #print('N = ', N)
+    #print('D = ', D)
+    #print('H = ', H)
+    #print('C = ', C)
+
     # First layer
-    L1 = np.dot(X, W1)
-    L1 += b1              # (D, H)
+    L1 = np.dot(X, W1)    # (N, D) * (D, H)
+    L1 += b1              # (N, H) + (H, )
 
     # ReLU
-    L1 [x < 0] = 0
+    L1 [L1 < 0] = 0
 
     # Second layer
-    #L2 = np.dot(L1, W2)
-    #L2 += b2
+    L2 = np.dot(L1, W2)   # (N, H) * (H, C)
+    L2 += b2              # (N, C) + (C, )
 
-    # Softmax
-    #scores = np.zeros((N, C))
-    scores = softmax_loss_vectorized(W2, L1, y, reg)
-
+    scores = L2
 
     pass
     #############################################################################
@@ -110,6 +115,25 @@ class TwoLayerNet(object):
     # in the variable loss, which should be a scalar. Use the Softmax           #
     # classifier loss.                                                          #
     #############################################################################
+
+    # Softmax calculation
+    #scores = np.exp(L2)   # (N, C)
+
+    #idxN = np.arange(N)
+    #correctScores = scores[idxN, y]
+    #scoreSum = np.sum(scores, axis=1)   # (N, )
+
+    #print ('idxN : ', idxN)
+    #print ('y : ', y)
+
+    #print ('shape scores : ', scores.shape)
+    #print ('shape correctScores : ', correctScores.shape)
+    #print ('shape scoreSum : ', scoreSum.shape)
+
+    # Calculate the loss.
+    #loss = -np.log(correctScores / scoreSum)
+    #loss = np.sum(loss) / N + reg * np.sum(W ** 2)
+
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
