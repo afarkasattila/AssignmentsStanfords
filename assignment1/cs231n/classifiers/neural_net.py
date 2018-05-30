@@ -77,9 +77,21 @@ class TwoLayerNet(object):
     # shape (N, C).                                                             #
     #############################################################################
 
+    # First layer
     L1 = np.dot(X, W1)
+    L1 += b1              # (D, H)
 
-    scores = np.zeros((N, C))
+    # ReLU
+    L1 [x < 0] = 0
+
+    # Second layer
+    #L2 = np.dot(L1, W2)
+    #L2 += b2
+
+    # Softmax
+    #scores = np.zeros((N, C))
+    scores = softmax_loss_vectorized(W2, L1, y, reg)
+
 
     pass
     #############################################################################
