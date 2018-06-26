@@ -117,11 +117,11 @@ class TwoLayerNet(object):
     #############################################################################
 
     # Softmax calculation
-    #scores = np.exp(L2)   # (N, C)
+    scores = np.exp(L2)   # (N, C)
 
-    #idxN = np.arange(N)
-    #correctScores = scores[idxN, y]
-    #scoreSum = np.sum(scores, axis=1)   # (N, )
+    idxN = np.arange(N)
+    correctScores = scores[idxN, y]
+    scoreSum = np.sum(scores, axis=1)   # (N, )
 
     #print ('idxN : ', idxN)
     #print ('y : ', y)
@@ -131,8 +131,8 @@ class TwoLayerNet(object):
     #print ('shape scoreSum : ', scoreSum.shape)
 
     # Calculate the loss.
-    #loss = -np.log(correctScores / scoreSum)
-    #loss = np.sum(loss) / N + reg * np.sum(W ** 2)
+    loss = -np.log(correctScores / scoreSum)
+    loss = np.sum(loss) / N + reg * np.sum(W1 ** 2) + reg * np.sum(W2 ** 2)
 
     pass
     #############################################################################
@@ -146,6 +146,7 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
+
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
